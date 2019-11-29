@@ -43,7 +43,7 @@ def main():
     def send_userlist():
         for u in users.keys():
             if not u.closed:
-                u.send(json.dumps({'type' : 'userlist', 'connected': users.values()}))
+                u.send(json.dumps({'type' : 'userlist', 'connected': [], 'count': len(users.values())}))
 
     def clean_username(usr, ws):
         username = bleach.clean(usr, tags=ALLOWEDTAGS, strip=True)
@@ -85,6 +85,7 @@ def main():
                 if receivedmsg is not None:
 
                     receivedmsg = receivedmsg.decode('utf8')
+                    #print(receivedmsg)
                     if len(receivedmsg) > 4096:      # this user is probably a spammer
                         ws.send(json.dumps({'type' : 'flood'}))
                         break
@@ -103,7 +104,7 @@ def main():
                                 break
 
                         msg = json.loads(receivedmsg)
-
+                        #print(msg)
                         if msg['type'] == 'message':
                             message = (bleach.clean(msg['message'], tags=ALLOWEDTAGS, strip=True)).strip()
 
@@ -136,8 +137,10 @@ def main():
                             users[ws] = username
                             send_userlist()
                 else:
+                    print(receivedmsg)
                     break
-            except (WebSocketError, ValueError, UnicodeDecodeError):      # ValueError happens for example when "No JSON object could be decoded", would be interesting to log it
+            except (WebSocketError, ValueError, UnicodeDecodeError) as e:      # ValueError happens for example when "No JSON object could be decoded", would be interesting to log it
+                print(e)
                 break
 
         if ws in users:
@@ -166,7 +169,7 @@ if len(sys.argv) == 1:           # command line interactive mode
     main()
 
 elif len(sys.argv) == 2:         # daemon mode
-    daemon = talktalktalk(pidfile='_.pid', stdout='log.txt', stderr='log.txt')
+    daemon = talktalktalk(pidfile='_.pid', stdout='log.txt', stderr='err.txt')
    
     if 'start' == sys.argv[1]: 
         daemon.start()

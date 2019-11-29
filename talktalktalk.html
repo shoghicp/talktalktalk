@@ -11,7 +11,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>TalkTalkTalk</title>
+<title>ANONYMOUS CHAT ROOM</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />    
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style type="text/css">
@@ -35,9 +35,13 @@ html { overflow-y: scroll; }
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 </head>
 <body>
-<a id="banner" href="https://github.com/josephernest/talktalktalk" target="_blank"><img style="position: fixed; top: 0; right: 0; border: 0; width: 115px;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" id="fork"></a>
 <div id="right">
-TALKTALKTALK<br>############<br><br><br>
+ANONYMOUS CHAT ROOM<br>###############<br>
+<b>DISCLAIMER:</b><br>
+Remember this chat room is public for everyone with the password, and that you probably should not talk about projects or deadlines that have not been announced.
+<br>Please stay civil, and respect everyone. This is intended for employees and other involved parties, be mindful while sharing information and access.<br><br>
+Refresh page to get new username. Only timestamp, username and message are saved and stored.
+<br><br>
 <div id="notifications">NOTIFICATIONS<br><span id="notificationswitch" class="dashed">on</span><br><br></div>
 USERNAME<br><span id="username" class="dashed">user</span><input value="user1" id="usernameinput" maxlength="16" /><br><br>
 ONLINE USERS<div id="connected"></div>
@@ -51,7 +55,7 @@ ONLINE USERS<div id="connected"></div>
 <div id="popup" class="hidden popup"></div>
 <script type="text/javascript">
 var popsound = new Audio('popsound.mp3');
-var randomname = 'user' + Math.floor((Math.random() * 1000) + 1);
+var randomname = 'user' + Math.floor((Math.random() * 10000) + 1);
 var displayeduser;
 var ws;
 var lastPong;
@@ -137,12 +141,12 @@ function ready() {
         $('#writing').val('');
     }
 
-    if (localStorage.getItem("username") === null || localStorage.getItem("username") === '') {
+    //if (localStorage.getItem("username") === null || localStorage.getItem("username") === '') {
         $('#username').text(randomname);
-        localStorage.setItem("username", $('#username').text());
-    }
-    else 
-        $('#username').text(localStorage.getItem("username"));
+    //    localStorage.setItem("username", $('#username').text());
+    //}
+    //else 
+    //    $('#username').text(localStorage.getItem("username"));
 
     ws = new WebSocket(location.href.replace('http', 'ws') + 'ws');        // replace replaces only the first occurence
       
@@ -234,15 +238,15 @@ function ready() {
                 scroll_end();
         }
         else if (data['type'] === 'userlist') {
-            users = data['connected'];
-            $('#connected').html(users.join('<br>'));         // or .map(x => `${x}<br>`).join('')
+            users = data['count'];
+            $('#connected').html(users + ' users currently online');         // or .map(x => `${x}<br>`).join('')
         }
         else if (data['type'] === 'username') {  // server asks to (re)send username
             ws.send(JSON.stringify({ "type" : "username", "username" : $('#username').text() }));
         }
         else if (data['type'] === 'usernameunavailable') {
             $('#username').text(data['username']);
-            localStorage.setItem("username", $('#username').text());
+            //localStorage.setItem("username", $('#username').text());
             popup_message('Your username has been changed because the one you entered is reserved.', true, false);
         }
         else if (data['type'] === 'flood') {
@@ -302,7 +306,7 @@ function ready() {
         if (usr === '')
             usr = randomname;
         $('#username').text(usr);
-        localStorage.setItem("username", usr);
+        //localStorage.setItem("username", usr);
         $('#usernameinput').hide();
         $('#username').show();
         ws.send(JSON.stringify({ "type" : "username", "username" : usr }));
