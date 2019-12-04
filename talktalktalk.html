@@ -42,6 +42,8 @@ Remember this chat room is public for everyone with the password, and that you p
 <br>Please stay civil, and respect everyone. This is intended for employees and other involved parties, be mindful while sharing information and access.<br><br>
 Refresh page to get new username. Only timestamp, username and message are saved and stored.
 <br><br>
+<a href="/export" target="_blank">Export all history</a>
+<br><br>
 <div id="notifications">NOTIFICATIONS<br><span id="notificationswitch" class="dashed">on</span><br><br></div>
 USERNAME<br><span id="username" class="dashed">user</span><input value="user1" id="usernameinput" maxlength="16" /><br><br>
 ONLINE USERS<div id="connected"></div>
@@ -103,6 +105,31 @@ function timeConverter(t) {     // http://stackoverflow.com/a/40449006/1422096
         return date + ' ' + month + ', ' + time;
     else
         return date + ' ' + month + ' ' + year + ', ' + time;
+}
+
+function colorize(str){
+	var hash = 0;
+        for(var i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + (hash << 6) + (hash << 16) - hash;
+        }
+  
+        // get a positive value for the hue
+        var deg = hash % 360;
+        var h = deg < 0 ? 360 + deg : deg;
+
+        // default L is 50
+        var l = 50;
+
+        // half of the hues are too light, for those we
+        // decrease lightness
+        if(h >= 30 && h <= 210) {
+            l = 30;
+        }
+
+        // keep saturation above 20
+        var s = 20 + Math.abs(hash) % 80;
+
+        return "hsl(" + h + "," + s + "%," + l + "%)";  
 }
 
 function mediaPlaybackRequiresUserGesture() { // http://stackoverflow.com/a/40474415/1422096
@@ -206,7 +233,7 @@ function ready() {
             }
             lastId = data['id'];
             var isscrolledend = is_scrolled_end();
-            $('#main').append('<p title="' + timeConverter(data['datetime']) + '"><b>' + data['username'] + '</b>: ' + add_urls(data['message']) + '</p>');
+            $('#main').append('<p title="' + timeConverter(data['datetime']) + '"><b style="color: '+colorize(data['username'])+';">' + data['username'] + '</b>: ' + add_urls(data['message']) + '</p>');
             if (isscrolledend)
                 scroll_end();
             if (data['username'] !== $('#username').text() && data['username'] !== displayeduser && $('#notificationswitch').text() === 'on') {
@@ -220,7 +247,7 @@ function ready() {
                 var msg = JSON.parse(messagelist[i]);
                 if (data['before'] != 1 && msg['id'] <= lastId)       // message already added 
                     continue;
-                $(newmessages).append('<p title="' + timeConverter(msg['datetime']) + '"><b>' + msg['username'] + '</b>: ' + add_urls(msg['message']) + '</p>');
+                $(newmessages).append('<p title="' + timeConverter(msg['datetime']) + '"><b style="color: '+colorize(msg['username'])+';">' + msg['username'] + '</b>: ' + add_urls(msg['message']) + '</p>');
                 firstId = Math.min(firstId, msg['id'])
                 lastId = Math.max(lastId, msg['id']);
             }
@@ -274,8 +301,9 @@ function ready() {
 
     $('#writing').keydown(function(e) {
         if (e.keyCode == 13 && !e.shiftKey) {
-            if ($('#writing').val().trim() !== '')
-                ws.send(JSON.stringify({ type: 'message', username: $('#username').text(), message: $('#writing').val().trim() }));
+            if ($('#writing').val().trim() !== ''){
+                ws.send(JSON.stringify({ type: 'message', username: $('#username').text(), message: $('#writing').val().trim().normalize().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"') }));
+	    }
             $('#writing').val('');     
             e.preventDefault();  
         }

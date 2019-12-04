@@ -51,12 +51,12 @@ def main():
         username = re.sub(r'\W+', '', username)       # because of spam and usage of malicious utf8 characters, let's use alphanumeric usernames only for now
         username = username[:16]
         if username.lower() == ADMINNAME or username == '':
-            username = 'user' + str(random.randint(0, 1000))
+            username = 'user' + str(random.randint(0, 10000))
             ws.send(json.dumps({'type' : 'usernameunavailable', 'username' : username}))
         elif username.lower() == ADMINHIDDENNAME:
             username = ADMINNAME
             ws.send(json.dumps({'type' : 'displayeduser', 'username' : username}))
-        return username            
+        return username
 
     def dbworker():        # when a user disappears during more than 30 seconds (+/- 10), remove him/her from the userlist
         while True:
@@ -124,7 +124,7 @@ def main():
 
                         elif msg['type'] == 'messagesbefore':
                             idbefore = msg['id']
-                            ws.send(json.dumps({'type' : 'messages', 'before': 1, 'messages': [db[str(i)] for i in range(max(0,idbefore - 100),idbefore)]}))
+                            ws.send(json.dumps({'type' : 'messages', 'before': 1, 'messages': [db[str(i)] for i in range(max(0,idbefore - 1000),idbefore)]}))
 
                         elif msg['type'] == 'messagesafter':
                             idafter = msg['id']
@@ -133,7 +133,7 @@ def main():
                         elif msg['type'] == 'username':
                             username = clean_username(msg['username'], ws)
                             if ws not in users:          # welcome new user
-                                ws.send(json.dumps({'type' : 'messages', 'before': 0, 'messages': [db[str(i)] for i in range(max(0,idx - 100),idx)]}))
+                                ws.send(json.dumps({'type' : 'messages', 'before': 0, 'messages': [db[str(i)] for i in range(max(0,idx - 250),idx)]}))
                             users[ws] = username
                             send_userlist()
                 else:
