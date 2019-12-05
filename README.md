@@ -1,3 +1,6 @@
+Note: this forks contains edits like adding colors, and having it setup behind nginx between other things.
+
+
 TalkTalkTalk
 =============
 
